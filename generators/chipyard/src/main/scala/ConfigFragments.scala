@@ -28,12 +28,36 @@ import cva6.{CVA6TileAttachParams}
 import sifive.blocks.devices.gpio._
 import sifive.blocks.devices.uart._
 import sifive.blocks.devices.spi._
+import sifive.blocks.devices.pwm._
+import sifive.blocks.devices.i2c._
 
 import chipyard._
 
 // -----------------------
 // Common Config Fragments
 // -----------------------
+
+
+class WithNGPIO(nGPIOs: Int = 3) extends Config((site, here, up) => {
+  case PeripheryGPIOKey => List(
+    GPIOParams(address = 0x10012000, width = nGPIOs, includeIOF = false))
+})
+
+class WithNSPI(csW: Int = 1) extends Config((site, here, up) => {
+  case PeripherySPIKey => List(
+    SPIParams(csWidth = csW, rAddress = 0x10024000, defaultSampleDel = 3))
+})
+
+class WithI2C(nI2C : Int = 4 ) extends Config((site, here, up) =>{
+  case PeripheryI2CKey => List(
+    (0 until nI2C).map{i =>
+      I2CParams(address = 0x10028000 + 0x10*i)
+    })
+})
+class WithPWM() extends Config((site, here, up) =>{
+    case PeripheryPWMKey => List(
+      PWMParams(address = 0x10029000))
+})
 
 class WithBootROM extends Config((site, here, up) => {
   case BootROMLocated(x) => up(BootROMLocated(x), site).map(_.copy(contentFileName = s"./bootrom/bootrom.rv${site(XLen)}.img"))
